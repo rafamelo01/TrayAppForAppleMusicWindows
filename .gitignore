@@ -1,0 +1,14 @@
+# Runtime state
+hidden.txt
+hide-on-minimize.txt
+status.txt
+startup-error.txt
+
+# Local builds and backups
+build/
+*.backup-*.cs
+*.backup-*.exe
+*.before-*.cs
+*.before-*.exe
+WindowTest.cs
+WindowTest.exe

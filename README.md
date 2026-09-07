@@ -1,6 +1,6 @@
 # Apple Music Hotkeys
 
-Miniapp para Windows que adiciona atalhos globais para controlar o Apple Music em segundo plano, sem depender do PowerToys. Fica na bandeja do sistema e pode ocultar completamente o ícone mantendo os atalhos ativos.
+Miniapp para Windows que adiciona atalhos globais para controlar o Apple Music em segundo plano, sem depender do PowerToys. Também esconde a janela do Apple Music na bandeja enquanto a reprodução e os processos continuam ativos.
 
 ## Atalhos
 
@@ -9,6 +9,7 @@ Miniapp para Windows que adiciona atalhos globais para controlar o Apple Music e
 | `F2` | Reproduzir ou pausar a mídia ativa do Windows |
 | `Ctrl + Alt + ↑` | Aumentar o volume do Apple Music em 2 pontos percentuais |
 | `Ctrl + Alt + ↓` | Diminuir o volume do Apple Music em 2 pontos percentuais |
+| `Ctrl + Alt + M` | Mostrar ou ocultar a janela do Apple Music |
 
 O ajuste de volume afeta somente as sessões de áudio do Apple Music no mixer do Windows. Outros aplicativos e o volume geral do dispositivo não são alterados.
 
@@ -31,10 +32,13 @@ Não requer PowerToys, AutoHotkey ou pacotes NuGet.
 2. Execute o aplicativo. Um ícone musical rosa aparecerá na bandeja, possivelmente dentro da área de ícones ocultos do Windows.
 3. Abra o Apple Music e reproduza uma música.
 4. Use os atalhos mesmo quando estiver trabalhando em outro aplicativo.
+5. Use `Ctrl + Alt + M` ou clique duas vezes no ícone da bandeja para esconder ou recuperar a janela do Apple Music.
 
 Para deixar o controle de volume concentrado no mixer, mantenha a barra interna do Apple Music em um nível fixo, como 100%, e ajuste o volume pelos atalhos. A barra dentro do Apple Music não acompanha as alterações feitas no mixer.
 
-O Apple Music precisa permanecer aberto ou minimizado. Este miniapp não mantém a reprodução após fechar o Apple Music pelo X.
+Quando a janela é ocultada, ela desaparece da barra de tarefas, mas `AppleMusic.exe` e seus processos auxiliares continuam abertos. Por isso a reprodução não é interrompida.
+
+O botão **X** do Apple Music ainda encerra o aplicativo e interrompe a reprodução. Para obter o comportamento de “fechar para a bandeja”, use `Ctrl + Alt + M`, clique duas vezes no ícone ou ative **Ocultar Apple Music ao minimizar** e use o botão de minimizar.
 
 Antes de usar, remova remapeamentos desses mesmos atalhos de outros programas, incluindo o PowerToys, para evitar conflitos.
 
@@ -42,6 +46,10 @@ Antes de usar, remova remapeamentos desses mesmos atalhos de outros programas, i
 
 Clique com o botão direito no ícone para acessar:
 
+- **Mostrar Apple Music:** restaura a janela; se o aplicativo não estiver aberto, tenta iniciá-lo.
+- **Ocultar Apple Music:** remove sua janela da tela e da barra de tarefas sem encerrar a reprodução.
+- **Alternar janela:** mostra ou oculta a janela, como `Ctrl + Alt + M`.
+- **Ocultar Apple Music ao minimizar:** transforma o botão de minimizar em uma forma de enviar a janela para a bandeja.
 - **Reproduzir / pausar:** envia o mesmo comando de F2.
 - **Aumentar volume / Diminuir volume:** ajusta somente o Apple Music.
 - **Iniciar com o Windows:** ativa ou desativa a inicialização automática para o usuário atual.
@@ -92,6 +100,9 @@ O resultado fica em `build\AppleMusicTray.exe`. Para atualizar uma instalação 
 .\AppleMusicTray.exe --exit          # Encerra a instância existente
 .\AppleMusicTray.exe --volume-up     # Aumenta o volume pela instância existente
 .\AppleMusicTray.exe --volume-down   # Diminui o volume pela instância existente
+.\AppleMusicTray.exe --toggle-music  # Mostra ou oculta a janela do Apple Music
+.\AppleMusicTray.exe --show-music    # Mostra ou inicia o Apple Music
+.\AppleMusicTray.exe --hide-music    # Oculta a janela sem encerrar a reprodução
 ```
 
 Os comandos de volume exigem uma instância já em execução. O argumento `--startup` não cadastra o início automático; use a opção do menu para isso.
@@ -104,7 +115,9 @@ Os comandos de volume exigem uma instância já em execução. O argumento `--st
 | `Audio.cs` | Identificação das sessões do Apple Music e ajuste de volume pelo Windows Core Audio |
 | `AppleMusicTray.exe` | Executável compilado |
 
-Os atalhos usam `RegisterHotKey` com `MOD_NOREPEAT`. O volume é processado em uma thread separada e limitado ao intervalo de 0% a 100%.
+Os atalhos usam `RegisterHotKey` com `MOD_NOREPEAT`. O volume é processado em uma thread separada e limitado ao intervalo de 0% a 100%. A janela do Apple Music é localizada pelo processo `AppleMusic.exe` e ocultada com a API `ShowWindow` do Windows.
+
+Para manter o menu da bandeja responsivo, a preferência de ocultar ao minimizar permanece em memória durante a execução. O monitor só fica ativo quando essa opção está ligada, verifica a janela uma vez por segundo e reutiliza os identificadores encontrados por um curto período. O ajuste de volume continua fora da thread da interface.
 
 O controle reconhece `AppleMusic.exe` e o auxiliar `AMPLibraryAgent.exe`, verificando se pertencem ao pacote `AppleInc.AppleMusicWin_`. Em cada dispositivo de saída, usa a primeira sessão ativa encontrada como referência e aplica o mesmo nível às demais sessões do Apple Music. Se não houver sessão ativa, usa a primeira sessão disponível do aplicativo.
 
@@ -113,6 +126,7 @@ O controle reconhece `AppleMusic.exe` e o auxiliar `AMPLibraryAgent.exe`, verifi
 O aplicativo grava estes arquivos ao lado do executável:
 
 - `hidden.txt`: preferência de visibilidade do ícone.
+- `hide-on-minimize.txt`: preferência para ocultar a janela do Apple Music quando ela for minimizada.
 - `status.txt`: estado da instância, registro dos atalhos, última ação e eventual erro.
 - `startup-error.txt`: diagnóstico de falha na inicialização, quando houver.
 
@@ -122,7 +136,9 @@ São arquivos da instalação local; não são necessários para compilar ou dis
 
 **O ícone desapareceu:** execute o app novamente para recuperá-lo. Verifique também a área de ícones ocultos da barra de tarefas.
 
-**Os atalhos não foram registrados:** feche outros programas que usem as mesmas combinações e remova remapeamentos equivalentes do PowerToys. `status.txt` deve indicar `registered=3` quando os três atalhos estiverem disponíveis.
+**Os atalhos não foram registrados:** feche outros programas que usem as mesmas combinações e remova remapeamentos equivalentes do PowerToys. `status.txt` deve indicar `registered=4` quando os quatro atalhos estiverem disponíveis.
+
+**A janela não reaparece:** pressione `Ctrl + Alt + M` ou escolha **Mostrar Apple Music**. Se o processo tiver sido encerrado pelo X, o miniapp inicia uma nova instância, mas a reprodução anterior não é retomada automaticamente.
 
 **A barra interna do Apple Music não muda:** o ajuste é feito no mixer do Windows, independentemente dessa barra.
 

@@ -1,7 +1,9 @@
-pid=37572
-registered=3
+pid=20544
+registered=4
 trayVisible=True
 startup=True
-lastAction=play-pause
+hideMusicOnMinimize=True
+musicWindowVisible=False
+lastAction=hide-music
 lastError=
-updatedUtc=2026-09-07T18:00:09.7571659Z
+updatedUtc=2026-09-07T19:20:29.0297067Z
