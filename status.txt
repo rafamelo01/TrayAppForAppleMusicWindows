@@ -1,0 +1,7 @@
+pid=37572
+registered=3
+trayVisible=True
+startup=True
+lastAction=play-pause
+lastError=
+updatedUtc=2026-09-07T17:56:32.1439745Z

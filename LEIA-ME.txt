@@ -1,0 +1,16 @@
+Apple Music Hotkeys
+
+F2: reproduzir/pausar a mídia ativa do Windows.
+Ctrl + Alt + seta para cima/baixo: alterar somente o Apple Music em 2 pontos percentuais por toque.
+O Apple Music deve permanecer aberto ou minimizado.
+
+Clique com o botão direito no ícone musical rosa da bandeja:
+- Iniciar com o Windows: liga/desliga o início automático.
+- Ocultar ícone (manter atalhos): remove o ícone, mantendo os atalhos ativos.
+- Sair (desativar atalhos): encerra o miniapp.
+
+Para recuperar o ícone oculto, abra Apple Music Hotkeys pelo menu Iniciar.
+O estado oculto é lembrado no próximo início do Windows.
+Apenas uma instância funciona de cada vez. Não depende do PowerToys.
+
+Desinstalar: desmarque Iniciar com o Windows, use Sair, depois remova a pasta TrayApp e o atalho Apple Music Hotkeys do menu Iniciar.
